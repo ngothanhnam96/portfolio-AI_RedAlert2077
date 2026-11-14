@@ -1,0 +1,15 @@
+{
+  "name": "tien-tuyen-2077",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Tien Tuyen 2077 - an original real-time strategy game for the browser.",
+  "type": "module",
+  "license": "GPL-3.0",
+  "scripts": {
+    "start": "node scripts/serve.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

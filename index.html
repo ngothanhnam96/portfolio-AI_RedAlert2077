@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b0f14">
+  <meta name="description" content="Tiền Tuyến 2077: game chiến thuật thời gian thực. Xây căn cứ, khai thác quặng tinh thể, lập quân đội và đánh bại đối thủ máy.">
+  <title>Tiền Tuyến 2077</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app" id="app">
+    <main class="view" id="view">
+      <canvas id="world" aria-label="Chiến trường"></canvas>
+      <div class="alerts" id="alerts" aria-live="polite"></div>
+      <div class="hud-top" id="hud-top" hidden>
+        <span class="clock" id="clock">00:00</span>
+        <span class="mode-hint" id="mode-hint" hidden></span>
+      </div>
+      <div class="touch-tools" id="touch-tools" hidden>
+        <button type="button" class="tool" id="box-tool" aria-pressed="false" title="Kéo để chọn vùng">⬚</button>
+        <button type="button" class="tool" id="attack-tool" aria-pressed="false" title="Tấn công-di chuyển">⚔</button>
+        <button type="button" class="tool" id="zoom-in" title="Phóng to">＋</button>
+        <button type="button" class="tool" id="zoom-out" title="Thu nhỏ">－</button>
+      </div>
+    </main>
+
+    <aside class="sidebar" id="sidebar" hidden>
+      <div class="side-top">
+        <div class="credits" title="Tiền"><span aria-hidden="true">◈</span> <strong id="credits">0</strong></div>
+        <div class="power" title="Điện: sản xuất / tiêu thụ">
+          <div class="power-bar"><i id="power-made"></i><b id="power-used"></b></div>
+          <span id="power-text">0/0</span>
+        </div>
+      </div>
+      <div class="radar">
+        <canvas id="minimap" aria-label="Bản đồ radar"></canvas>
+        <div class="radar-off" id="radar-off"><span>📡 Cần <strong>Trạm radar</strong> và đủ điện</span></div>
+      </div>
+      <div class="build-tabs" role="tablist">
+        <button type="button" role="tab" data-cat="structure" aria-selected="true">🏗<span>Công trình</span></button>
+        <button type="button" role="tab" data-cat="infantry" aria-selected="false">🪖<span>Bộ binh</span></button>
+        <button type="button" role="tab" data-cat="vehicle" aria-selected="false">🚙<span>Xe</span></button>
+      </div>
+      <div class="build-grid" id="build-grid" role="tabpanel"></div>
+      <div class="selection" id="selection" aria-live="polite"></div>
+      <div class="side-buttons">
+        <button type="button" class="sbtn" id="pause-btn" title="Tạm dừng (P)">⏸</button>
+        <button type="button" class="sbtn" id="speed-btn" title="Tốc độ">1×</button>
+        <button type="button" class="sbtn" id="sound-btn" title="Âm thanh (M)">🔊</button>
+        <button type="button" class="sbtn" id="music-btn" title="Nhạc (N)">🎵</button>
+        <button type="button" class="sbtn" id="help-btn" title="Cách chơi">?</button>
+      </div>
+    </aside>
+  </div>
+
+  <section class="menu" id="menu" aria-labelledby="menu-title">
+    <div class="menu-card">
+      <p class="kicker">Chiến lược thời gian thực</p>
+      <h1 id="menu-title">TIỀN TUYẾN <span>2077</span></h1>
+      <p class="lore">Năm 2077, quặng tinh thể rơi xuống từ bầu trời. Ai kiểm soát mỏ, kẻ đó kiểm soát thế giới. Hãy chỉ huy <strong class="blue">Liên Quân Xanh</strong> đánh bại <strong class="red">Phe Đỏ</strong>.</p>
+      <form class="setup" id="setup">
+        <fieldset>
+          <legend>Đối thủ</legend>
+          <div class="seg" role="radiogroup">
+            <label><input type="radio" name="ai" value="easy"><span>Dễ</span></label>
+            <label><input type="radio" name="ai" value="normal" checked><span>Thường</span></label>
+            <label><input type="radio" name="ai" value="hard"><span>Khó</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Bản đồ</legend>
+          <div class="seg" role="radiogroup">
+            <label><input type="radio" name="size" value="48" checked><span>Nhỏ 48²</span></label>
+            <label><input type="radio" name="size" value="64"><span>Vừa 64²</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Tiền khởi đầu</legend>
+          <div class="seg" role="radiogroup">
+            <label><input type="radio" name="credits" value="3000" checked><span>3.000</span></label>
+            <label><input type="radio" name="credits" value="5000"><span>5.000</span></label>
+            <label><input type="radio" name="credits" value="10000"><span>10.000</span></label>
+          </div>
+        </fieldset>
+        <fieldset class="seed-row">
+          <legend>Mã bản đồ</legend>
+          <input type="number" id="seed" min="1" max="999999" inputmode="numeric" aria-label="Mã bản đồ">
+          <button type="button" class="ghost" id="seed-roll" title="Ngẫu nhiên">🎲</button>
+        </fieldset>
+        <div class="menu-actions">
+          <button type="submit" class="primary" id="start-btn">▶ Bắt đầu chiến dịch</button>
+          <button type="button" class="ghost" id="howto-btn">Cách chơi</button>
+        </div>
+      </form>
+      <p class="fineprint">Đồ họa và âm thanh đều được tạo bằng code · Không cần cài đặt</p>
+    </div>
+  </section>
+
+  <section class="overlay" id="overlay" hidden>
+    <div class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title"></div>
+  </section>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
